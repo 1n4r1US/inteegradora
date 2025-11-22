@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" fill="none">
+  <rect width="160" height="160" rx="24" fill="#FFFFFF" stroke="#E6F3EE"/>
+  <circle cx="80" cy="54" r="34" fill="#3CB371" opacity="0.14"/>
+  <text x="50%" y="70%" text-anchor="middle" font-family="Roboto, sans-serif" font-size="20" fill="#2F4F4F">Avatar</text>
+</svg>
