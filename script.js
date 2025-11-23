@@ -13,6 +13,120 @@ function hideLoader() {
 }
 
 document.addEventListener('DOMContentLoaded',function(){
+        // Alternancia de formularios en auth.html
+        const loginCard = document.getElementById('loginCard');
+        const registerCard = document.getElementById('registerCard');
+        const tabLogin = document.getElementById('tabLogin');
+        const tabRegister = document.getElementById('tabRegister');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+
+        function mostrarLogin(){
+          if(loginCard) loginCard.style.display = '';
+          if(registerCard) registerCard.style.display = 'none';
+          if(tabLogin) tabLogin.classList.add('active');
+          if(tabRegister) tabRegister.classList.remove('active');
+        }
+        function mostrarRegistro(){
+          if(loginCard) loginCard.style.display = 'none';
+          if(registerCard) registerCard.style.display = '';
+          if(tabLogin) tabLogin.classList.remove('active');
+          if(tabRegister) tabRegister.classList.add('active');
+        }
+        if(tabLogin) tabLogin.addEventListener('click', mostrarLogin);
+        if(tabRegister) tabRegister.addEventListener('click', mostrarRegistro);
+        if(showRegister) showRegister.addEventListener('click', function(e){ e.preventDefault(); mostrarRegistro(); });
+        if(showLogin) showLogin.addEventListener('click', function(e){ e.preventDefault(); mostrarLogin(); });
+        mostrarLogin();
+      // Login de usuario
+      const loginForm = document.getElementById('loginForm');
+      if(loginForm){
+        loginForm.addEventListener('submit', function(e){
+          e.preventDefault();
+          const correo = loginForm.email.value.trim();
+          const password = loginForm.password.value;
+          if(!correo || !password){
+            alert('Por favor ingresa tu correo y contraseña.');
+            return;
+          }
+          showLoader();
+          fetch('backend/api/login.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({correo, password})
+          })
+          .then(res => res.json())
+          .then(data => {
+            hideLoader();
+            if(data.success && data.user){
+              // Guardar usuario en localStorage
+              localStorage.setItem('user', JSON.stringify(data.user));
+              // Redirigir a dashboard
+              window.location.href = 'dashboard.html';
+            } else {
+              alert(data.message || 'Credenciales incorrectas.');
+            }
+          })
+          .catch(err => {
+            hideLoader();
+            alert('Error de conexión con el servidor.');
+          });
+        });
+      }
+    // Registro de nuevos usuarios
+    const registerForm = document.getElementById('registerForm');
+    if(registerForm){
+      registerForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        // Obtener valores
+        const nombre = registerForm.nombre.value.trim();
+        const apellido = registerForm.apellido.value.trim();
+        const genero = registerForm.genero.value;
+        const telefono = registerForm.telefono.value.trim();
+        const direccion = registerForm.direccion.value.trim();
+        const rol = registerForm.rol.value;
+        const email = registerForm.email.value.trim();
+        const password = registerForm.password.value;
+        // Validación básica
+        if(!nombre || !apellido || !genero || !telefono || !direccion || !rol || !email || !password){
+          alert('Por favor completa todos los campos.');
+          return;
+        }
+        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+          alert('Ingresa un correo válido.');
+          return;
+        }
+        showLoader();
+        fetch('backend/api/register.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({nombre, apellido, genero, telefono, direccion, rol, correo: email, password})
+        })
+        .then(res => res.json())
+        .then(data => {
+          hideLoader();
+          if(data.success){
+            alert('¡Registro exitoso! Bienvenido/a, ' + data.usuario.nombre + '.');
+            registerForm.reset();
+          } else {
+            alert(data.error || 'Ocurrió un error al registrar.');
+          }
+        })
+        .catch(err => {
+          hideLoader();
+          alert('Error de conexión con el servidor.');
+        });
+      });
+    }
+  // Prueba de conexión con backend PHP
+  fetch('backend/api/hello.php')
+    .then(res => res.json())
+    .then(data => {
+      console.log('Respuesta backend:', data);
+    })
+    .catch(err => {
+      console.error('Error al conectar con backend:', err);
+    });
   // Botón flotante 'Ir arriba'
   const scrollBtn = document.getElementById('scrollTopBtn');
   if(scrollBtn){

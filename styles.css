@@ -1,3 +1,150 @@
+/* Modales para dashboard */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0; top: 0; width: 100vw; height: 100vh;
+  background: rgba(47,79,79,0.13);
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn .2s;
+}
+.modal-content {
+  background: #fff;
+  margin: 5% auto;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  border-radius: 16px;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(47,79,79,0.13);
+  position: relative;
+  animation: fadeUp .3s;
+}
+.modal-content h2 { margin-top: 0; }
+.modal-content label { display: block; margin-top: 1rem; margin-bottom: .3rem; }
+.modal-content input { width: 100%; padding: .6rem; border-radius: 8px; border: 1px solid #e6eef1; margin-bottom: .7rem; }
+.modal-content .btn { width: 100%; margin-top: 1rem; }
+.close {
+  position: absolute;
+  top: 1rem; right: 1.2rem;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
+  font-weight: bold;
+}
+.form-msg { margin-top: .7rem; font-size: .98em; }
+/* Layout para dashboard con sidebar */
+/* Ajuste para dashboard sin sidebar */
+.dashboard-main {
+  margin-left: 0;
+  padding-top: 2.5rem;
+  min-height: 100vh;
+  background: #f8fefb;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.dashboard-main {
+  margin-left: 240px;
+  padding-top: 2.5rem;
+  min-height: 100vh;
+  background: #f8fefb;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+/* Sidebar para dashboard */
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background: #f7fafc;
+  box-shadow: 2px 0 12px rgba(47,79,79,0.07);
+  position: fixed;
+  top: 0; left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  z-index: 100;
+}
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: .7em;
+  padding: 1.2em 1em;
+  border-bottom: 1px solid #e0e0e0;
+}
+.sidebar-logo {
+  width: 32px; height: 32px; border-radius: 8px; object-fit: cover;
+}
+.sidebar-title {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #1976d2;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: .2em;
+  padding: 1.2em 1em;
+}
+.sidebar-link {
+  color: #2F4F4F;
+  text-decoration: none;
+  padding: .55em 1em;
+  border-radius: 8px;
+  transition: background .18s;
+  font-size: 1.04em;
+  margin-bottom: 2px;
+  display: block;
+}
+.sidebar-link:hover, .sidebar-link.active {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+.logout { color: #c62828; }
+@media (max-width: 1100px) {
+  .dashboard-layout { flex-direction: column; }
+  .sidebar { display: none; }
+  .dashboard-main-area { width: 100vw; }
+  .dashboard-main { max-width: 100vw; }
+}
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  main.container { margin-left: 0 !important; max-width: 100vw !important; }
+}
+/* Dashboard y paneles por rol */
+.dashboard-panel {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(47,79,79,0.07);
+}
+.dashboard-panel h2 { margin-bottom: 1.5rem; }
+.card {
+  background: #f7fafc;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(47,79,79,0.05);
+}
+.stats-grid {
+  display: flex;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  flex: 1;
+  background: #e3f2fd;
+  border-radius: 10px;
+  padding: 1.2rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+.paciente .card { border-left: 5px solid #4caf50; }
+.psicologo .card { border-left: 5px solid #1976d2; }
+.admin .card { border-left: 5px solid #ff9800; }
 /* Loader animado para transiciones y formularios */
 .loader-overlay {
   position: fixed;

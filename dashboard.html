@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <img src="assets/logo.jpg" alt="Logo" width="40" height="40" class="rounded shadow-sm">
+        Bienestar Emocional
+      </a>
+      <button id="btnLogout" class="btn btn-outline-danger ms-auto d-none d-lg-inline-block">Cerrar sesión</button>
+    </div>
+  </nav>
+  <main class="container py-4">
+    <h1 id="dashboard-title" class="mb-4">Dashboard</h1>
+    <div id="dashboard-content" class="dashboard-panel"></div>
+
+    <!-- Modal Editar Perfil (Bootstrap) -->
+    <div class="modal fade" id="modalPerfil" tabindex="-1" aria-labelledby="modalPerfilLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="modalPerfilLabel">Editar perfil</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <form id="formPerfil">
+              <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" id="perfilNombre" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Apellido</label>
+                <input type="text" id="perfilApellido" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Correo</label>
+                <input type="email" id="perfilCorreo" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <input type="text" id="perfilTelefono" class="form-control">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Dirección</label>
+                <input type="text" id="perfilDireccion" class="form-control">
+              </div>
+              <div id="perfilMsg" class="form-msg mb-2"></div>
+              <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Agendar Cita (Bootstrap) -->
+    <div class="modal fade" id="modalCita" tabindex="-1" aria-labelledby="modalCitaLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title fs-5" id="modalCitaLabel">Agendar nueva cita</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <form id="formCita">
+              <div class="mb-3">
+                <label class="form-label">Psicólogo</label>
+                <select id="citaPsicologo" class="form-select" required>
+                  <option value="">Selecciona un psicólogo</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" id="citaFecha" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Hora</label>
+                <input type="time" id="citaHora" class="form-control" required>
+              </div>
+              <div id="citaMsg" class="form-msg mb-2"></div>
+              <button type="submit" class="btn btn-primary w-100">Agendar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="bg-light text-center py-3 mt-5 border-top">
+    <div class="container">
+      <span class="text-muted">&copy; <span id="year"></span> Bienestar. Todos los derechos reservados.</span>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="script.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // Botón cerrar sesión
+    const btnLogout = document.getElementById('btnLogout');
+    if(btnLogout){
+      btnLogout.classList.remove('d-none');
+      btnLogout.addEventListener('click', function(){
+        localStorage.removeItem('user');
+        window.location.href = 'auth.html';
+      });
+    }
+    // Render dinámico del dashboard según rol
+    document.addEventListener('DOMContentLoaded', function() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const dashboardContent = document.getElementById('dashboard-content');
+      const dashboardTitle = document.getElementById('dashboard-title');
+      if (!user) {
+        dashboardContent.innerHTML = '<div class="alert alert-warning">No has iniciado sesión. <a href="auth.html">Inicia sesión aquí</a>.</div>';
+        dashboardTitle.textContent = 'Dashboard';
+        return;
+      }
+      if (user.rol === 'psicologo') {
+        dashboardTitle.textContent = 'Panel del Psicólogo';
+        dashboardContent.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
+        fetch('backend/api/psicologo.php')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.psicologos) {
+              const psicologo = data.psicologos.find(p => p.user_id == user.user_id);
+              if (!psicologo) {
+                dashboardContent.innerHTML = '<div class="alert alert-danger">No se encontró tu perfil de psicólogo.</div>';
+                return;
+              }
+              dashboardContent.innerHTML = `
+                <div class="card mb-4">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <h2 class="card-title mb-0">Bienvenido, ${psicologo.nombre} ${psicologo.apellido}</h2>
+                      <button class="btn btn-outline-primary btn-sm" id="btnEditarPerfil"><i class="bi bi-pencil"></i> Editar perfil</button>
+                    </div>
+                    <p><strong>Correo:</strong> ${psicologo.correo}</p>
+                    <p><strong>Teléfono:</strong> ${psicologo.telefono || 'No registrado'}</p>
+                    <div class="mb-2">
+                      <strong>Consultorio:</strong> <span id="consultorio-nombre">${psicologo.consultorio || 'Sin asignar'}</span>
+                      <div class="d-inline ms-2">
+                        <button class="btn btn-sm btn-outline-success" id="btnAsignarConsultorio">${psicologo.consultorio ? 'Editar' : 'Asignar'} consultorio</button>
+                        ${psicologo.consultorio ? '<button class="btn btn-sm btn-outline-danger ms-1" id="btnEliminarConsultorio">Eliminar</button>' : ''}
+                      </div>
+                    </div>
+                    <p><strong>Modalidad:</strong> ${psicologo.modalidad || 'No especificada'}</p>
+                    <p><strong>Costo:</strong> $${psicologo.costo || '0.00'} MXN</p>
+                  </div>
+                </div>
+                <!-- Modal Consultorio -->
+                <div class="modal fade" id="modalConsultorio" tabindex="-1" aria-labelledby="modalConsultorioLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h2 class="modal-title fs-5" id="modalConsultorioLabel">${psicologo.consultorio ? 'Editar' : 'Asignar'} consultorio</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                      </div>
+                      <div class="modal-body">
+                        <form id="formConsultorio">
+                          <div class="mb-3">
+                            <label class="form-label">Consultorio</label>
+                            <select id="consultorioSelect" class="form-select" required></select>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Modalidad</label>
+                            <select id="modalidadSelect" class="form-select" required>
+                              <option value="presencial">Presencial</option>
+                              <option value="online">Online</option>
+                              <option value="mixto">Mixto</option>
+                            </select>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Costo (MXN)</label>
+                            <input type="number" id="costoInput" class="form-control" min="0" step="0.01" required>
+                          </div>
+                          <div id="consultorioMsg" class="form-msg mb-2"></div>
+                          <button type="submit" class="btn btn-primary w-100">Guardar</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-body">
+                    <h3 class="card-title mb-3">Tus pacientes y citas</h3>
+                    <div id="psicologo-citas"></div>
+                  </div>
+                </div>
+              `;
+              // Botón editar perfil
+              setTimeout(() => {
+                const btnEditar = document.getElementById('btnEditarPerfil');
+                if(btnEditar){
+                  btnEditar.addEventListener('click', function(){
+                    // Rellenar el modal con los datos actuales
+                    document.getElementById('perfilNombre').value = psicologo.nombre;
+                    document.getElementById('perfilApellido').value = psicologo.apellido;
+                    document.getElementById('perfilCorreo').value = psicologo.correo;
+                    var modal = new bootstrap.Modal(document.getElementById('modalPerfil'));
+                    modal.show();
+                  });
+                }
+                // Consultorio: asignar/editar
+                const btnConsultorio = document.getElementById('btnAsignarConsultorio');
+                if(btnConsultorio){
+                  btnConsultorio.addEventListener('click', function(){
+                    // Cargar consultorios disponibles
+                    fetch('backend/api/consultorio.php')
+                      .then(res => res.json())
+                      .then(data => {
+                        const select = document.getElementById('consultorioSelect');
+                        select.innerHTML = '';
+                        if(data.success && data.consultorios.length > 0){
+                          data.consultorios.forEach(c => {
+                            const opt = document.createElement('option');
+                            opt.value = c.consultorio_id;
+                            opt.textContent = c.consultorio + ' - ' + c.direccion;
+                            if(psicologo.consultorio_id == c.consultorio_id) opt.selected = true;
+                            select.appendChild(opt);
+                          });
+                        } else {
+                          const opt = document.createElement('option');
+                          opt.value = '';
+                          opt.textContent = 'No hay consultorios disponibles';
+                          select.appendChild(opt);
+                        }
+                        // Modalidad y costo
+                        document.getElementById('modalidadSelect').value = psicologo.modalidad || 'presencial';
+                        document.getElementById('costoInput').value = psicologo.costo || 0;
+                        var modal = new bootstrap.Modal(document.getElementById('modalConsultorio'));
+                        modal.show();
+                      });
+                  });
+                }
+                // Guardar consultorio
+                const formConsultorio = document.getElementById('formConsultorio');
+                if(formConsultorio){
+                  formConsultorio.onsubmit = function(e){
+                    e.preventDefault();
+                    const consultorio_id = document.getElementById('consultorioSelect').value;
+                    const modalidad = document.getElementById('modalidadSelect').value;
+                    const costo = document.getElementById('costoInput').value;
+                    fetch('backend/api/psicologo.php', {
+                      method: 'PUT',
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify({
+                        user_id: psicologo.user_id,
+                        cedula: psicologo.cedula,
+                        consultorio_id,
+                        costo,
+                        modalidad
+                      })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                      const msg = document.getElementById('consultorioMsg');
+                      if(data.success){
+                        msg.textContent = 'Consultorio actualizado correctamente.';
+                        msg.style.color = 'green';
+                        setTimeout(()=>window.location.reload(), 1000);
+                      } else {
+                        msg.textContent = data.error || 'Error al actualizar consultorio.';
+                        msg.style.color = 'crimson';
+                      }
+                    });
+                  }
+                }
+                // Eliminar consultorio
+                const btnEliminar = document.getElementById('btnEliminarConsultorio');
+                if(btnEliminar){
+                  btnEliminar.addEventListener('click', function(){
+                    if(confirm('¿Seguro que deseas eliminar el consultorio asignado?')){
+                      fetch('backend/api/psicologo.php', {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                          user_id: psicologo.user_id,
+                          cedula: psicologo.cedula,
+                          consultorio_id: null,
+                          costo: psicologo.costo,
+                          modalidad: psicologo.modalidad
+                        })
+                      })
+                      .then(res => res.json())
+                      .then(data => {
+                        if(data.success){
+                          alert('Consultorio eliminado.');
+                          window.location.reload();
+                        } else {
+                          alert(data.error || 'Error al eliminar consultorio.');
+                        }
+                      });
+                    }
+                  });
+                }
+              }, 100);
+              // Cargar citas del psicólogo
+              fetch('backend/api/cita.php')
+                .then(res => res.json())
+                .then(data => {
+                  const citasDiv = document.getElementById('psicologo-citas');
+                  if (data.success && data.citas) {
+                    const citas = data.citas.filter(c => c.id_psicologo == user.user_id);
+                    if (citas.length === 0) {
+                      citasDiv.innerHTML = '<p class="text-muted">No tienes citas agendadas.</p>';
+                    } else {
+                      citasDiv.innerHTML = '<ul class="list-group">' + citas.map(c => `
+                        <li class="list-group-item">
+                          <strong>Paciente:</strong> ${c.nombre_paciente} ${c.apellido_paciente} <br>
+                          <strong>Fecha:</strong> ${c.fecha} <strong>Hora:</strong> ${c.hora} <br>
+                          <strong>Estado:</strong> ${c.estado}
+                        </li>
+                      `).join('') + '</ul>';
+                    }
+                  } else {
+                    citasDiv.innerHTML = '<div class="alert alert-warning">No se pudieron cargar las citas.</div>';
+                  }
+                });
+            } else {
+              dashboardContent.innerHTML = '<div class="alert alert-danger">No se pudo cargar la información del psicólogo.</div>';
+            }
+          });
+      }
+      // Renderizado para paciente
+      if (user.rol === 'paciente') {
+        dashboardTitle.textContent = 'Panel del Paciente';
+        dashboardContent.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></div>';
+        // Obtener datos del paciente
+        fetch('backend/api/paciente.php')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.pacientes) {
+              const paciente = data.pacientes.find(p => p.user_id == user.user_id);
+              if (!paciente) {
+                dashboardContent.innerHTML = '<div class="alert alert-danger">No se encontró tu perfil de paciente.</div>';
+                return;
+              }
+              dashboardContent.innerHTML = `
+                <div class="card mb-4">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <h2 class="card-title mb-0">Bienvenido, ${paciente.nombre} ${paciente.apellido}</h2>
+                      <button class="btn btn-outline-primary btn-sm" id="btnEditarPerfil"><i class="bi bi-pencil"></i> Editar perfil</button>
+                    </div>
+                    <p><strong>Correo:</strong> ${paciente.correo}</p>
+                    <p><strong>Teléfono:</strong> ${paciente.telefono || 'No registrado'}</p>
+                    <p><strong>Dirección:</strong> ${paciente.direccion || 'No registrada'}</p>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h3 class="card-title mb-0">Tus citas agendadas</h3>
+                      <button class="btn btn-success btn-sm" id="btnNuevaCita"><i class="bi bi-calendar-plus"></i> Agendar cita</button>
+                    </div>
+                    <div id="paciente-citas"></div>
+                  </div>
+                </div>
+              `;
+              // Botón editar perfil paciente
+              setTimeout(() => {
+                const btnEditar = document.getElementById('btnEditarPerfil');
+                if(btnEditar){
+                  btnEditar.addEventListener('click', function(){
+                    document.getElementById('perfilNombre').value = paciente.nombre;
+                    document.getElementById('perfilApellido').value = paciente.apellido;
+                    document.getElementById('perfilCorreo').value = paciente.correo;
+                    if(document.getElementById('perfilTelefono')) document.getElementById('perfilTelefono').value = paciente.telefono || '';
+                    if(document.getElementById('perfilDireccion')) document.getElementById('perfilDireccion').value = paciente.direccion || '';
+                    var modal = new bootstrap.Modal(document.getElementById('modalPerfil'));
+                    modal.show();
+                  });
+                }
+                // Guardar cambios de perfil paciente
+                const formPerfil = document.getElementById('formPerfil');
+                if(formPerfil){
+                  formPerfil.onsubmit = function(e){
+                    e.preventDefault();
+                    const nombre = document.getElementById('perfilNombre').value.trim();
+                    const apellido = document.getElementById('perfilApellido').value.trim();
+                    const correo = document.getElementById('perfilCorreo').value.trim();
+                    const telefono = document.getElementById('perfilTelefono') ? document.getElementById('perfilTelefono').value.trim() : '';
+                    const direccion = document.getElementById('perfilDireccion') ? document.getElementById('perfilDireccion').value.trim() : '';
+                    fetch('backend/api/paciente.php', {
+                      method: 'PUT',
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify({
+                        user_id: paciente.user_id,
+                        nombre,
+                        apellido,
+                        telefono,
+                        direccion
+                      })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                      const msg = document.getElementById('perfilMsg');
+                      if(data.success){
+                        msg.textContent = 'Perfil actualizado correctamente.';
+                        msg.style.color = 'green';
+                        setTimeout(()=>window.location.reload(), 1000);
+                      } else {
+                        msg.textContent = data.error || 'Error al actualizar perfil.';
+                        msg.style.color = 'crimson';
+                      }
+                    });
+                  }
+                }
+              }, 100);
+              // Cargar citas del paciente
+              fetch('backend/api/cita.php')
+                .then(res => res.json())
+                .then(data => {
+                  const citasDiv = document.getElementById('paciente-citas');
+                  if (data.success && data.citas) {
+                    const citas = data.citas.filter(c => c.id_paciente == user.user_id);
+                    if (citas.length === 0) {
+                      citasDiv.innerHTML = '<p class="text-muted">No tienes citas agendadas.</p>';
+                    } else {
+                      citasDiv.innerHTML = '<ul class="list-group">' + citas.map(c => `
+                        <li class="list-group-item">
+                          <strong>Psicólogo:</strong> ${c.nombre_psicologo} ${c.apellido_psicologo} <br>
+                          <strong>Fecha:</strong> ${c.fecha} <strong>Hora:</strong> ${c.hora} <br>
+                          <strong>Estado:</strong> ${c.estado}
+                        </li>
+                      `).join('') + '</ul>';
+                    }
+                  } else {
+                    citasDiv.innerHTML = '<div class="alert alert-warning">No se pudieron cargar las citas.</div>';
+                  }
+                });
+              // Botón agendar cita
+              setTimeout(() => {
+                const btnNuevaCita = document.getElementById('btnNuevaCita');
+                if(btnNuevaCita){
+                  btnNuevaCita.addEventListener('click', function(){
+                    // Cargar psicólogos en el select
+                    fetch('backend/api/psicologo.php')
+                      .then(res => res.json())
+                      .then(data => {
+                        const select = document.getElementById('citaPsicologo');
+                        select.innerHTML = '';
+                        if(data.success && data.psicologos.length > 0){
+                          data.psicologos.forEach(p => {
+                            const opt = document.createElement('option');
+                            opt.value = p.user_id;
+                            opt.textContent = p.nombre + ' ' + p.apellido + (p.consultorio ? ' ('+p.consultorio+')' : '');
+                            select.appendChild(opt);
+                          });
+                        } else {
+                          const opt = document.createElement('option');
+                          opt.value = '';
+                          opt.textContent = 'No hay psicólogos disponibles';
+                          select.appendChild(opt);
+                        }
+                        var modal = new bootstrap.Modal(document.getElementById('modalCita'));
+                        modal.show();
+                      });
+                  });
+                }
+                // Enviar formulario de cita
+                const formCita = document.getElementById('formCita');
+                if(formCita){
+                  formCita.onsubmit = function(e){
+                    e.preventDefault();
+                    const id_psicologo = document.getElementById('citaPsicologo').value;
+                    const fecha = document.getElementById('citaFecha').value;
+                    const hora = document.getElementById('citaHora').value;
+                    if(!id_psicologo || !fecha || !hora){
+                      document.getElementById('citaMsg').textContent = 'Completa todos los campos.';
+                      document.getElementById('citaMsg').style.color = 'crimson';
+                      return;
+                    }
+                    fetch('backend/api/cita.php', {
+                      method: 'POST',
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify({
+                        id_paciente: user.user_id,
+                        id_psicologo,
+                        fecha,
+                        hora
+                      })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                      if(data.success){
+                        document.getElementById('citaMsg').textContent = 'Cita agendada correctamente.';
+                        document.getElementById('citaMsg').style.color = 'green';
+                        setTimeout(()=>window.location.reload(), 1000);
+                      } else {
+                        document.getElementById('citaMsg').textContent = data.error || 'Error al agendar cita.';
+                        document.getElementById('citaMsg').style.color = 'crimson';
+                      }
+                    });
+                  }
+                }
+              }, 100);
+            } else {
+              dashboardContent.innerHTML = '<div class="alert alert-danger">No se pudo cargar la información del paciente.</div>';
+            }
+          });
+      }
+    });
+  </script>
+</body>
+</html>
+                `;
+
