@@ -1,6 +1,4 @@
-# Archivos de configuración sensibles
-/backend/config/config.php
-*.env
+
 
 # Archivos temporales y logs
 *.log
