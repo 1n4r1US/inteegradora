@@ -1,6 +1,6 @@
-# Sitio estático: Atención Psicológica — Bienestar Emocional
+# Atención Psicológica — Bienestar Emocional
 
-Proyecto sencillo: página estática en español para un servicio de atención psicológica.
+Proyecto integradora: página para un servicio de atención psicológica.
 
 ## Frontend
 
