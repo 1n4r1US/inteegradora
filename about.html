@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sobre Nosotros — Bienestar</title>
+  <meta name="description" content="Quiénes somos y nuestra misión en Bienestar.">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" style="display:flex;align-items:center;gap:.6em;">
+        <img src="assets/logo.jpg" alt="Logo Bienestar Emocional" style="height:36px;width:auto;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <span>Bienestar Emocional</span>
+      </a>
+      <nav class="main-nav" id="mainNav">
+        <a href="index.html">Inicio</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="equipo.html">Equipo</a>
+        <a href="about.html" class="active" aria-current="page">Sobre Nosotros</a>
+        <a href="auth.html" class="button">Iniciar sesión</a>
+      </nav>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+    </div>
+  </header>
+
+  <main role="main" tabindex="-1">
+    <!-- I. Hero y Declaración -->
+    <section class="container about-hero will-animate" style="margin-bottom:2.5rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:2.5rem;">
+        <div>
+          <h1>Bienestar emocional: Un Espacio para el Cambio y el Bienestar.</h1>
+          <h2 class="hero-sub">Nuestra Historia y Compromiso</h2>
+          <p>Fundamos Bienestar emocional con la convicción de que la salud mental es la base de una vida plena. Somos un equipo de profesionales apasionados y dedicados a crear un entorno terapéutico seguro y efectivo, donde cada persona pueda encontrar las herramientas necesarias para superar desafíos y alcanzar su máximo potencial.</p>
+        </div>
+        <div style="text-align:center;">
+          <img src="assets/equipo.jpg" alt="Fotografía grupal del equipo de psicólogos de Bienestar Emocional" style="max-width:340px;width:100%;border-radius:16px;box-shadow:0 6px 24px rgba(47,79,79,0.10);">
+        </div>
+      </div>
+    </section>
+
+    <!-- II. Misión, Visión y Valores -->
+    <section class="container about-mision will-animate" style="margin-bottom:2.5rem;">
+      <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:2rem;">
+        <div class="card">
+          <h3>Misión</h3>
+          <p><strong>Nuestro Propósito:</strong> Ofrecer servicios de psicología y bienestar de la más alta calidad, basados en la ética profesional y la evidencia científica, guiando a nuestros pacientes hacia el autoconocimiento y la sanación duradera.</p>
+        </div>
+        <div class="card">
+          <h3>Visión</h3>
+          <p><strong>Nuestra Aspiración:</strong> Ser el centro de referencia en atención psicológica en Ciudad, reconocido por la calidez humana, la excelencia terapéutica y el impacto positivo en la comunidad.</p>
+        </div>
+        <div class="card">
+          <h3>Valores Fundamentales</h3>
+          <ul style="text-align:left;max-width:320px;margin:0 auto;">
+            <li><strong>Empatía:</strong> Creemos en escuchar sin juzgar, honrando la historia y la experiencia única de cada paciente.</li>
+            <li><strong>Integridad:</strong> Mantenemos los más altos estándares éticos, garantizando la confidencialidad y el respeto en cada interacción.</li>
+            <li><strong>Profesionalismo:</strong> Nuestro equipo se mantiene en constante formación para ofrecer las terapias más actualizadas y efectivas.</li>
+            <li><strong>Esperanza:</strong> Fomentamos una mentalidad de crecimiento, recordando a nuestros pacientes que el cambio y la mejora siempre son posibles.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- III. Filosofía Terapéutica y Diferenciadores -->
+    <section class="container about-filosofia will-animate" style="margin-bottom:2.5rem;">
+      <h2>¿Cómo Trabajamos en Bienestar emocional?</h2>
+      <p>Adoptamos un enfoque integrativo y personalizado. Entendemos que no hay dos caminos iguales hacia el bienestar. Por ello, combinamos lo mejor de distintas corrientes (TCC, Humanismo, Sistémica) para crear un plan terapéutico que se adapte exactamente a tus necesidades y objetivos.</p>
+      <div class="grid" style="grid-template-columns:repeat(3,1fr);gap:2rem;">
+        <div class="card">
+          <h3>Enfoque Holístico</h3>
+          <p>Tratamos a la persona de forma integral (mente, cuerpo y entorno), no solo los síntomas.</p>
+        </div>
+        <div class="card">
+          <h3>Tecnología y Confort</h3>
+          <p>Ofrecemos la comodidad de la terapia online, además de consultorios presenciales acogedores y modernos.</p>
+        </div>
+        <div class="card">
+          <h3>Compromiso con el Desarrollo</h3>
+          <p>No solo tratamos el malestar, sino que nos enfocamos en el desarrollo de resiliencia y el crecimiento postraumático.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- IV. Invitación al Contacto -->
+    <section class="container about-cta will-animate" style="text-align:center;max-width:700px;margin:2rem auto;">
+      <h2>Tu Próximo Capítulo Comienza Aquí</h2>
+      <p>Te invitamos a dar el primer paso. Si sientes que es el momento de buscar apoyo, estamos aquí para escucharte.</p>
+      <a href="auth.html" class="btn primary">Contáctanos y Comencemos Juntos</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:2rem;">
+      <!-- Legal -->
+      <div class="footer-col" style="min-width:220px;flex:1;">
+        <p class="small">&copy; 2025 Bienestar — Atención psicológica.<br>Todos los derechos reservados.</p>
+        <a href="#" class="small">Aviso Legal</a>
+      </div>
+      <!-- Navegación y redes -->
+      <div class="footer-col" style="min-width:220px;flex:1;text-align:center;">
+        <nav class="footer-nav" style="margin-bottom:.7em;">
+          <a href="index.html">Inicio</a> |
+          <a href="servicios.html">Servicios</a> |
+          <a href="equipo.html">Equipo</a>
+        </nav>
+        <div class="footer-social" style="display:flex;justify-content:center;gap:.7em;">
+          <a href="#" aria-label="Instagram" title="Instagram"><img src="assets/instagram.svg" alt="Instagram" width="24" height="24" style="vertical-align:middle;"></a>
+          <a href="#" aria-label="Facebook" title="Facebook"><img src="assets/facebook.svg" alt="Facebook" width="24" height="24" style="vertical-align:middle;"></a>
+          <a href="#" aria-label="LinkedIn" title="LinkedIn"><img src="assets/linkedin.svg" alt="LinkedIn" width="24" height="24" style="vertical-align:middle;"></a>
+        </div>
+      </div>
+      <!-- Contacto -->
+      <div class="footer-col" style="min-width:220px;flex:1;text-align:right;">
+        <p class="small"><strong>Dirección:</strong><br>Km. 37.5 Carr. Federal Mexico - Pachuca, 55740 Tecamac, ESTADO DE MEXICO</p>
+        <p class="small"><strong>Tel:</strong> +56 9 1234 5678<br><strong>Correo:</strong> contacto@tubienestar.com</p>
+      </div>
+    </div>
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Ir arriba" title="Ir arriba" style="position:fixed;bottom:2.2rem;right:2.2rem;z-index:1000;display:none;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:48px;height:48px;box-shadow:0 4px 16px rgba(47,79,79,0.13);font-size:1.7rem;cursor:pointer;transition:opacity .2s;align-items:center;justify-content:center;">
+    91
+  </button>
+  <script src="script.js" type="module" defer></script>
+</body>
+</html>

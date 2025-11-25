@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de API y Seguridad</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        .card { border: 1px solid #ccc; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; }
+        button { cursor: pointer; padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f4f4f4; padding: 1rem; overflow-x: auto; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Pruebas de Corrección y Seguridad</h1>
+
+    <div class="card">
+        <h2>1. Prueba de Seguridad: Usuarios (Sin Contraseñas)</h2>
+        <p>Al hacer clic, se solicitará la lista de usuarios. Verificaremos que el campo <code>password</code> NO esté presente.</p>
+        <button onclick="testUsuarios()">Obtener Usuarios</button>
+        <div id="resultUsuarios"></div>
+    </div>
+
+    <div class="card">
+        <h2>2. Prueba de Login (Inyección SQL corregida)</h2>
+        <p>Intentaremos hacer login. Puedes probar con credenciales válidas o inválidas.</p>
+        <input type="email" id="email" placeholder="Correo" value="juan@ejemplo.com">
+        <input type="password" id="password" placeholder="Contraseña" value="123456">
+        <button onclick="testLogin()">Probar Login</button>
+        <div id="resultLogin"></div>
+    </div>
+
+    <script>
+        async function testUsuarios() {
+            const div = document.getElementById('resultUsuarios');
+            div.innerHTML = 'Cargando...';
+            try {
+                const res = await fetch('backend/api/usuarios.php');
+                const data = await res.json();
+                
+                if (data.success && data.usuarios.length > 0) {
+                    const primerUsuario = data.usuarios[0];
+                    if (primerUsuario.hasOwnProperty('password')) {
+                        div.innerHTML = `<p class="error">❌ FALLO: La contraseña AÚN es visible en la respuesta.</p>`;
+                    } else {
+                        div.innerHTML = `<p class="success">✅ ÉXITO: La contraseña NO está visible.</p>`;
+                    }
+                    // Mostrar TODOS los usuarios
+                    div.innerHTML += `<p>Total usuarios encontrados: ${data.usuarios.length}</p>`;
+                    div.innerHTML += `<pre style="max-height: 300px; overflow-y: auto;">${JSON.stringify(data.usuarios, null, 2)}</pre>`;
+                } else {
+                    div.innerHTML = `<p>No hay usuarios o hubo un error: ${JSON.stringify(data)}</p>`;
+                }
+            } catch (e) {
+                div.innerHTML = `<p class="error">Error de conexión: ${e.message}</p>`;
+            }
+        }
+
+        async function testLogin() {
+            const div = document.getElementById('resultLogin');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            div.innerHTML = 'Enviando...';
+            try {
+                const res = await fetch('backend/api/login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ correo: email, password: password })
+                });
+                const data = await res.json();
+                div.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (e) {
+                div.innerHTML = `<p class="error">Error de conexión: ${e.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

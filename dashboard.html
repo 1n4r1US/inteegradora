@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="site-header" role="banner">
+      <div class="container header-inner">
+        <a class="brand" href="index.html" style="display:flex;align-items:center;gap:.6em;">
+          <img src="assets/logo.jpg" alt="Logo de Bienestar Emocional, psicología y bienestar" style="height:36px;width:auto;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+          <span>Bienestar Emocional</span>
+        </a>
+      </div>
+    </header>
+    <main class="dashboard-main container">
+        <h1 id="dashboard-title">Dashboard</h1>
+        <div id="dashboard-content" class="dashboard-panel"></div>
+
+        <!-- Modal Editar Perfil -->
+        <div id="modalPerfil" class="modal" style="display:none;">
+          <div class="modal-content">
+            <span class="close" id="closePerfil">&times;</span>
+            <h2>Editar perfil</h2>
+            <form id="formPerfil">
+              <label>Nombre</label>
+              <input type="text" id="perfilNombre" required>
+              <label>Apellido</label>
+              <input type="text" id="perfilApellido" required>
+              <label>Correo</label>
+              <input type="email" id="perfilCorreo" required>
+              <label>Teléfono</label>
+              <input type="tel" id="perfilTelefono" required>
+              <label>Dirección</label>
+              <input type="text" id="perfilDireccion" required>
+              <button type="submit" class="btn primary">Guardar cambios</button>
+            </form>
+            <div id="perfilMsg" class="form-msg"></div>
+          </div>
+        </div>
+
+        <!-- Modal Gestionar Cita (Psicólogo) -->
+        <div id="modalGestionCita" class="modal" style="display:none;">
+          <div class="modal-content">
+            <span class="close" id="closeGestionCita">&times;</span>
+            <h2>Gestionar Cita</h2>
+            <div class="info-paciente" style="background:#f9f9f9;padding:1em;border-radius:8px;margin-bottom:1em;">
+                <h3>Datos del Paciente</h3>
+                <p><strong>Nombre:</strong> <span id="gestionPacienteNombre"></span></p>
+                <p><strong>Teléfono:</strong> <span id="gestionPacienteTelefono"></span></p>
+                <p><strong>Correo:</strong> <span id="gestionPacienteCorreo"></span></p>
+            </div>
+            <form id="formGestionCita">
+              <input type="hidden" id="gestionCitaId">
+              <input type="hidden" id="gestionCitaFecha">
+              <input type="hidden" id="gestionCitaHora">
+              <label>Estado de la cita</label>
+              <select id="gestionCitaEstado" required>
+                <option value="pendiente">Pendiente</option>
+                <option value="completada">Completada</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+              <button type="submit" class="btn primary">Actualizar Cita</button>
+            </form>
+            <div id="gestionCitaMsg" class="form-msg"></div>
+          </div>
+        </div>
+
+        <!-- Modal Agendar Cita -->
+        <div id="modalCita" class="modal" style="display:none;">
+          <div class="modal-content">
+            <span class="close" id="closeCita">&times;</span>
+            <h2>Agendar nueva cita</h2>
+            <form id="formCita">
+              <label>Psicólogo</label>
+              <select id="citaPsicologo" required>
+                <option value="">Selecciona un psicólogo</option>
+              </select>
+              <label>Fecha</label>
+              <input type="date" id="citaFecha" required>
+              <label>Hora</label>
+              <input type="time" id="citaHora" required>
+              <button type="submit" class="btn primary">Agendar</button>
+            </form>
+            <div id="citaMsg" class="form-msg"></div>
+          </div>
+        </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const dashboardTitle = document.getElementById('dashboard-title');
+    const dashboardContent = document.getElementById('dashboard-content');
+    if (!user || !user.rol) {
+      window.location.href = '../auth.html';
+    } else {
+      dashboardTitle.textContent = `Bienvenido, ${user.nombre} (${user.rol})`;
+      dashboardContent.classList.add(user.rol);
+      // Panel principal según rol
+      if (user.rol === 'paciente') {
+            dashboardContent.innerHTML = `
+                <div class="card resumen">
+                  <h3>Próxima cita</h3>
+                  <p id="proximaCita">Cargando...</p>
+                  <button class="btn primary" id="btnAgendarCita">Agendar nueva cita</button>
+                </div>
+                <div class="card historial">
+                  <h3>Historial de citas</h3>
+                  <ul id="historialCitas">
+                    <li>Cargando...</li>
+                  </ul>
+                </div>
+                <div class="card perfil">
+                  <h3>Perfil</h3>
+                  <p>Nombre: <span id="perfilNombreSpan">${user.nombre}</span> <span id="perfilApellidoSpan">${user.apellido}</span></p>
+                  <p>Correo: <span id="perfilCorreoSpan">${user.correo}</span></p>
+                  <p>Teléfono: <span id="perfilTelefonoSpan">${user.telefono || 'No registrado'}</span></p>
+                  <p>Dirección: <span id="perfilDireccionSpan">${user.direccion || 'No registrada'}</span></p>
+                  <button class="btn secondary" id="btnEditarPerfil">Actualizar perfil</button>
+                </div>
+                <button class="btn logout" id="logoutBtn">Cerrar sesión</button>
+            `;
+            // Cargar citas del backend
+            fetch('backend/api/cita.php')
+              .then(res => res.json())
+              .then(data => {
+                if(data.success && Array.isArray(data.citas)){
+                  // Filtrar citas del paciente actual
+                  const citasPaciente = data.citas.filter(c => c.id_paciente == user.user_id);
+                  // Ordenar por fecha y hora
+                  citasPaciente.sort((a,b)=>{
+                    const d1 = new Date(a.fecha + 'T' + a.hora);
+                    const d2 = new Date(b.fecha + 'T' + b.hora);
+                    return d1 - d2;
+                  });
+                  // Próxima cita (la más próxima en el futuro y pendiente)
+                  const ahora = new Date();
+                  const proxima = citasPaciente.find(c => {
+                    const citaDate = new Date(c.fecha + 'T' + c.hora);
+                    return citaDate > ahora && (c.estado === 'pendiente' || c.estado === 'confirmada');
+                  });
+                  if(proxima){
+                    document.getElementById('proximaCita').innerHTML = `
+                        <strong>Fecha:</strong> ${proxima.fecha} a las ${proxima.hora}<br>
+                        <strong>Psicólogo:</strong> ${proxima.nombre_psicologo || ''} ${proxima.apellido_psicologo || ''}<br>
+                        <strong>Teléfono:</strong> ${proxima.telefono_psicologo || 'No disponible'}<br>
+                        <strong>Estado:</strong> ${proxima.estado}
+                    `;
+                  } else {
+                    document.getElementById('proximaCita').textContent = 'No tienes citas próximas.';
+                  }
+                  // Historial (todas las citas, más recientes primero)
+                  const historial = citasPaciente.slice().reverse().map(c => {
+                    return `<li>${c.fecha} - ${c.estado}${c.nombre_psicologo ? ' con ' + c.nombre_psicologo : ''}</li>`;
+                  }).join('');
+                  document.getElementById('historialCitas').innerHTML = historial || '<li>No hay citas registradas.</li>';
+                } else {
+                  document.getElementById('proximaCita').textContent = 'No se pudo cargar.';
+                  document.getElementById('historialCitas').innerHTML = '<li>No se pudo cargar.</li>';
+                }
+              })
+              .catch(err => {
+                document.getElementById('proximaCita').textContent = 'Error de conexión.';
+                document.getElementById('historialCitas').innerHTML = '<li>Error de conexión.</li>';
+              });
+        } else if (user.rol === 'psicologo') {
+            dashboardContent.innerHTML = `
+                <div class="card agenda">
+                  <h3>Próximas Citas</h3>
+                  <ul id="agendaHoy"><li>Cargando...</li></ul>
+                </div>
+                <div class="card pacientes">
+                  <h3>Pacientes asignados</h3>
+                  <ul id="pacientesAsignados"><li>Cargando...</li></ul>
+                </div>
+                <div class="card perfil-profesional">
+                  <h3>Perfil profesional</h3>
+                  <form id="formPsicologo">
+                    <label>Consultorio</label>
+                    <select id="psicologoConsultorio" required><option value="">Cargando...</option></select>
+                    <div style="margin:0.7em 0;display:flex;gap:0.5em;flex-wrap:wrap;">
+                      <button type="button" class="btn small" id="btnAddConsultorio">Agregar consultorio</button>
+                      <button type="button" class="btn small" id="btnEditConsultorio">Editar consultorio</button>
+                      <button type="button" class="btn small danger" id="btnDeleteConsultorio">Eliminar consultorio</button>
+                    </div>
+                    <label>Costo de sesión</label>
+                    <input type="number" id="psicologoCosto" min="0" step="0.01" required>
+                    <label>Teléfono de contacto</label>
+                    <input type="tel" id="psicologoTelefono" placeholder="Para que te contacten tus pacientes">
+                    <label>Modalidad</label>
+                    <select id="psicologoModalidad" required>
+                      <option value="presencial">Presencial</option>
+                      <option value="enlinea">En línea</option>
+                    </select>
+                    <button type="submit" class="btn primary">Guardar cambios</button>
+                  </form>
+                  <div id="psicologoMsg" class="form-msg"></div>
+                </div>
+                <button class="btn logout" id="logoutBtn">Cerrar sesión</button>
+                <!-- Modal Consultorio -->
+                <div id="modalConsultorio" class="modal" style="display:none;">
+                  <div class="modal-content">
+                    <span class="close" id="closeConsultorio">&times;</span>
+                    <h2 id="consultorioModalTitle">Agregar/Editar consultorio</h2>
+                    <form id="formConsultorio">
+                      <label>Nombre del consultorio</label>
+                      <input type="text" id="consultorioNombre" required>
+                      <label>Dirección</label>
+                      <input type="text" id="consultorioDireccion" required>
+                      <button type="submit" class="btn primary" id="consultorioSubmitBtn">Guardar</button>
+                    </form>
+                    <div id="consultorioMsg" class="form-msg"></div>
+                  </div>
+                </div>
+            `;
+            setTimeout(() => {
+                            // Botones de consultorio
+                            const btnAddConsultorio = document.getElementById('btnAddConsultorio');
+                            const btnEditConsultorio = document.getElementById('btnEditConsultorio');
+                            const btnDeleteConsultorio = document.getElementById('btnDeleteConsultorio');
+                            const modalConsultorio = document.getElementById('modalConsultorio');
+                            const closeConsultorio = document.getElementById('closeConsultorio');
+                            const formConsultorio = document.getElementById('formConsultorio');
+                            const consultorioNombre = document.getElementById('consultorioNombre');
+                            const consultorioDireccion = document.getElementById('consultorioDireccion');
+                            const consultorioMsg = document.getElementById('consultorioMsg');
+                            const consultorioModalTitle = document.getElementById('consultorioModalTitle');
+                            const consultorioSubmitBtn = document.getElementById('consultorioSubmitBtn');
+                            let editConsultorioId = null;
+
+                            // Abrir modal para agregar consultorio
+                            if(btnAddConsultorio) btnAddConsultorio.onclick = function(){
+                              consultorioModalTitle.textContent = 'Agregar consultorio';
+                              consultorioNombre.value = '';
+                              consultorioDireccion.value = '';
+                              consultorioMsg.textContent = '';
+                              consultorioSubmitBtn.textContent = 'Agregar';
+                              editConsultorioId = null;
+                              modalConsultorio.style.display = 'block';
+                            };
+                            // Abrir modal para editar consultorio
+                            if(btnEditConsultorio) btnEditConsultorio.onclick = function(){
+                              const select = document.getElementById('psicologoConsultorio');
+                              const selectedId = select.value;
+                              if(!selectedId){ consultorioMsg.textContent = 'Selecciona un consultorio para editar.'; return; }
+                              consultorioModalTitle.textContent = 'Editar consultorio';
+                              consultorioSubmitBtn.textContent = 'Guardar cambios';
+                              consultorioMsg.textContent = '';
+                              // Obtener datos actuales
+                              fetch('backend/api/consultorio.php')
+                                .then(res => res.json())
+                                .then(data => {
+                                  if(data.success && Array.isArray(data.consultorios)){
+                                    const c = data.consultorios.find(c => c.consultorio_id == selectedId);
+                                    if(c){
+                                      consultorioNombre.value = c.consultorio;
+                                      consultorioDireccion.value = c.direccion;
+                                      editConsultorioId = c.consultorio_id;
+                                      modalConsultorio.style.display = 'block';
+                                    }
+                                  }
+                                });
+                            };
+                            // Eliminar consultorio
+                            if(btnDeleteConsultorio) btnDeleteConsultorio.onclick = function(){
+                              const select = document.getElementById('psicologoConsultorio');
+                              const selectedId = select.value;
+                              if(!selectedId){ consultorioMsg.textContent = 'Selecciona un consultorio para eliminar.'; return; }
+                              if(confirm('¿Seguro que deseas eliminar este consultorio?')){
+                                fetch('backend/api/consultorio.php', {
+                                  method: 'DELETE',
+                                  headers: {'Content-Type': 'application/json'},
+                                  body: JSON.stringify({consultorio_id: selectedId})
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                  consultorioMsg.textContent = data.success ? 'Consultorio eliminado.' : (data.error || 'No se pudo eliminar.');
+                                  consultorioMsg.style.color = data.success ? 'green' : 'crimson';
+                                  setTimeout(()=>location.reload(), 1200);
+                                });
+                              }
+                            };
+                            // Cerrar modal consultorio
+                            if(closeConsultorio) closeConsultorio.onclick = function(){
+                              modalConsultorio.style.display = 'none';
+                            };
+                            // Guardar consultorio (agregar o editar)
+                            if(formConsultorio) formConsultorio.onsubmit = function(e){
+                              e.preventDefault();
+                              const nombre = consultorioNombre.value.trim();
+                              const direccion = consultorioDireccion.value.trim();
+                              if(!nombre || !direccion){
+                                consultorioMsg.textContent = 'Todos los campos son obligatorios.';
+                                consultorioMsg.style.color = 'crimson';
+                                return;
+                              }
+                              consultorioMsg.textContent = 'Guardando...';
+                              consultorioMsg.style.color = '#333';
+                              if(editConsultorioId){
+                                // Editar consultorio
+                                fetch('backend/api/consultorio.php', {
+                                  method: 'PUT',
+                                  headers: {'Content-Type': 'application/json'},
+                                  body: JSON.stringify({consultorio_id: editConsultorioId, consultorio: nombre, direccion})
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                  consultorioMsg.textContent = data.success ? 'Consultorio actualizado.' : (data.error || 'No se pudo actualizar.');
+                                  consultorioMsg.style.color = data.success ? 'green' : 'crimson';
+                                  if(data.success) setTimeout(()=>location.reload(), 1200);
+                                });
+                              } else {
+                                // Agregar consultorio
+                                fetch('backend/api/consultorio.php', {
+                                  method: 'POST',
+                                  headers: {'Content-Type': 'application/json'},
+                                  body: JSON.stringify({consultorio: nombre, direccion})
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                  consultorioMsg.textContent = data.success ? 'Consultorio creado.' : (data.error || 'No se pudo crear.');
+                                  consultorioMsg.style.color = data.success ? 'green' : 'crimson';
+                                  if(data.success) setTimeout(()=>location.reload(), 1200);
+                                });
+                              }
+                            };
+              // Cargar agenda y pacientes
+              fetch('backend/api/cita.php')
+                .then(res => res.json())
+                .then(data => {
+                  if(data.success && Array.isArray(data.citas)){
+                    const hoy = new Date().toISOString().slice(0,10);
+                    // Mostrar TODAS las citas futuras o pendientes del psicólogo, no solo las de hoy
+                    const agenda = data.citas.filter(c => c.id_psicologo == user.user_id && (c.estado === 'pendiente' || c.estado === 'confirmada'));
+                    
+                    // Ordenar por fecha
+                    agenda.sort((a,b) => new Date(a.fecha + 'T' + a.hora) - new Date(b.fecha + 'T' + b.hora));
+
+                    const pacientes = {};
+                    agenda.forEach(c => { if(c.id_paciente) pacientes[c.id_paciente] = c.nombre_paciente + ' ' + c.apellido_paciente; });
+                    
+                    // Renderizar agenda con botón de gestión
+                    if(agenda.length){
+                        document.getElementById('agendaHoy').innerHTML = agenda.map(c => `
+                            <li style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5em;border-bottom:1px solid #eee;padding-bottom:0.5em;">
+                                <div>
+                                    <strong>${c.fecha} ${c.hora}</strong><br>
+                                    ${c.nombre_paciente} ${c.apellido_paciente} (${c.estado})
+                                </div>
+                                <button class="btn small secondary btn-gestionar-cita" 
+                                    data-id="${c.id_cita}" 
+                                    data-paciente="${c.nombre_paciente} ${c.apellido_paciente}"
+                                    data-telefono="${c.telefono_paciente}"
+                                    data-correo="${c.correo_paciente}"
+                                    data-estado="${c.estado}"
+                                    data-fecha="${c.fecha}"
+                                    data-hora="${c.hora}">
+                                    Gestionar
+                                </button>
+                            </li>
+                        `).join('');
+                        
+                        // Agregar listeners a los botones generados dinámicamente
+                        document.querySelectorAll('.btn-gestionar-cita').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const modal = document.getElementById('modalGestionCita');
+                                document.getElementById('gestionCitaId').value = this.dataset.id;
+                                document.getElementById('gestionCitaFecha').value = this.dataset.fecha;
+                                document.getElementById('gestionCitaHora').value = this.dataset.hora;
+                                document.getElementById('gestionPacienteNombre').textContent = this.dataset.paciente;
+                                document.getElementById('gestionPacienteTelefono').textContent = this.dataset.telefono || 'No disponible';
+                                document.getElementById('gestionPacienteCorreo').textContent = this.dataset.correo || 'No disponible';
+                                document.getElementById('gestionCitaEstado').value = this.dataset.estado;
+                                document.getElementById('gestionCitaMsg').textContent = '';
+                                modal.style.display = 'block';
+                            });
+                        });
+                    } else {
+                        document.getElementById('agendaHoy').innerHTML = '<li>No hay citas para hoy.</li>';
+                    }
+
+                    document.getElementById('pacientesAsignados').innerHTML = Object.keys(pacientes).length ? Object.values(pacientes).map(n => `<li>${n}</li>`).join('') : '<li>No hay pacientes asignados.</li>';
+                  } else {
+                    document.getElementById('agendaHoy').innerHTML = '<li>No se pudo cargar.</li>';
+                    document.getElementById('pacientesAsignados').innerHTML = '<li>No se pudo cargar.</li>';
+                  }
+                })
+                .catch(()=>{
+                  document.getElementById('agendaHoy').innerHTML = '<li>Error de conexión.</li>';
+                  document.getElementById('pacientesAsignados').innerHTML = '<li>Error de conexión.</li>';
+                });
+              // Cargar consultorios y datos del psicólogo
+              fetch('backend/api/consultorio.php')
+                .then(res => res.json())
+                .then(data => {
+                  const select = document.getElementById('psicologoConsultorio');
+                  if(data.success && Array.isArray(data.consultorios)){
+                    select.innerHTML = '<option value="">Selecciona un consultorio</option>' +
+                      data.consultorios.map(c => `<option value="${c.consultorio_id}">${c.consultorio} (${c.direccion})</option>`).join('');
+                  } else {
+                    select.innerHTML = '<option value="">No disponibles</option>';
+                  }
+                });
+              // Cargar datos actuales del psicólogo
+              fetch('backend/api/psicologo.php')
+                .then(res => res.json())
+                .then(data => {
+                  if(data.success && Array.isArray(data.psicologos)){
+                    const p = data.psicologos.find(p => p.user_id == user.user_id);
+                    if(p){
+                      document.getElementById('psicologoConsultorio').value = p.consultorio_id || '';
+                      document.getElementById('psicologoCosto').value = p.costo || '';
+                      document.getElementById('psicologoModalidad').value = p.modalidad || 'presencial';
+                      document.getElementById('psicologoTelefono').value = p.telefono || ''; // Cargar teléfono
+                    }
+                  }
+                });
+              // Guardar cambios de perfil profesional
+              const formPsicologo = document.getElementById('formPsicologo');
+              if(formPsicologo){
+                formPsicologo.addEventListener('submit', function(e){
+                  e.preventDefault();
+                  const consultorio_id = document.getElementById('psicologoConsultorio').value;
+                  const costo = document.getElementById('psicologoCosto').value;
+                  const modalidad = document.getElementById('psicologoModalidad').value;
+                  const telefono = document.getElementById('psicologoTelefono').value.trim(); // Nuevo campo
+
+                  if(!consultorio_id || !costo || !modalidad){
+                    document.getElementById('psicologoMsg').textContent = 'Todos los campos son obligatorios.';
+                    document.getElementById('psicologoMsg').style.color = 'crimson';
+                    return;
+                  }
+                  document.getElementById('psicologoMsg').textContent = 'Guardando...';
+                  document.getElementById('psicologoMsg').style.color = '#333';
+                  fetch('backend/api/psicologo.php', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                      user_id: user.user_id,
+                      consultorio_id,
+                      costo,
+                      modalidad,
+                      telefono // Enviar teléfono
+                    })
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                    if(data.success){
+                      document.getElementById('psicologoMsg').textContent = 'Datos actualizados correctamente.';
+                      document.getElementById('psicologoMsg').style.color = 'green';
+                    } else {
+                      document.getElementById('psicologoMsg').textContent = data.error || 'No se pudo actualizar.';
+                      document.getElementById('psicologoMsg').style.color = 'crimson';
+                    }
+                  })
+                  .catch(()=>{
+                    document.getElementById('psicologoMsg').textContent = 'Error de conexión con el servidor.';
+                    document.getElementById('psicologoMsg').style.color = 'crimson';
+                  });
+                });
+              }
+            }, 100);
+        } else if (user.rol === 'admin') {
+        } else {
+          dashboardContent.innerHTML = `<p>Rol no reconocido.</p>`;
+        }
+    
+
+    // Interactividad: abrir/cerrar modales y actualizar datos
+    document.addEventListener('click', function(e) {
+      // Cerrar sesión
+      if(e.target && e.target.id === 'logoutBtn'){
+        e.preventDefault();
+        localStorage.removeItem('user');
+        window.location.href = 'logout.html';
+      }
+      // Abrir modal editar perfil
+      if(e.target && e.target.id === 'btnEditarPerfil'){
+        document.getElementById('modalPerfil').style.display = 'block';
+        document.getElementById('perfilNombre').value = user.nombre;
+        document.getElementById('perfilApellido').value = user.apellido;
+        document.getElementById('perfilCorreo').value = user.correo;
+        document.getElementById('perfilTelefono').value = user.telefono || '';
+        document.getElementById('perfilDireccion').value = user.direccion || '';
+        document.getElementById('perfilMsg').textContent = '';
+      }
+      // Cerrar modal editar perfil
+      if(e.target && e.target.id === 'closePerfil'){
+        document.getElementById('modalPerfil').style.display = 'none';
+      }
+      // Cerrar modal gestión cita
+      if(e.target && e.target.id === 'closeGestionCita'){
+        document.getElementById('modalGestionCita').style.display = 'none';
+      }
+      // Abrir modal agendar cita
+      if(e.target && e.target.id === 'btnAgendarCita'){
+        document.getElementById('modalCita').style.display = 'block';
+        document.getElementById('citaFecha').value = '';
+        document.getElementById('citaHora').value = '';
+        document.getElementById('citaMsg').textContent = '';
+        // Cargar psicólogos en el select (mostrar todos, aunque no tengan consultorio)
+        const selectPsicologo = document.getElementById('citaPsicologo');
+        selectPsicologo.innerHTML = '<option value="">Cargando...</option>';
+        fetch('backend/api/psicologo.php')
+          .then(res => res.json())
+          .then(data => {
+            if(data.success && Array.isArray(data.psicologos)){
+              selectPsicologo.innerHTML = '<option value="">Selecciona un psicólogo</option>' +
+                data.psicologos.map(p => `<option value="${p.user_id}">${p.nombre} ${p.apellido} (${p.consultorio && p.consultorio.trim() ? p.consultorio : 'Sin consultorio'})</option>`).join('');
+            } else {
+              selectPsicologo.innerHTML = '<option value="">No disponibles</option>';
+            }
+          })
+          .catch(()=>{
+            selectPsicologo.innerHTML = '<option value="">Error al cargar</option>';
+          });
+      }
+      // Cerrar modal agendar cita
+      if(e.target && e.target.id === 'closeCita'){
+        document.getElementById('modalCita').style.display = 'none';
+      }
+    });
+
+    // Guardar cambios de perfil (conexión real backend)
+    const formPerfil = document.getElementById('formPerfil');
+    if(formPerfil){
+      formPerfil.addEventListener('submit', function(e){
+        e.preventDefault();
+        const nombre = document.getElementById('perfilNombre').value.trim();
+        const apellido = document.getElementById('perfilApellido').value.trim();
+        const correo = document.getElementById('perfilCorreo').value.trim();
+        const telefono = document.getElementById('perfilTelefono').value.trim();
+        const direccion = document.getElementById('perfilDireccion').value.trim();
+        
+        if(!nombre || !apellido || !correo){
+          document.getElementById('perfilMsg').textContent = 'Nombre, apellido y correo son obligatorios.';
+          document.getElementById('perfilMsg').style.color = 'crimson';
+          return;
+        }
+        document.getElementById('perfilMsg').textContent = 'Actualizando...';
+        document.getElementById('perfilMsg').style.color = '#333';
+        fetch('backend/api/paciente.php', {
+          method: 'PUT',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            user_id: user.user_id,
+            nombre,
+            apellido,
+            telefono,
+            direccion
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if(data.success){
+            user.nombre = nombre;
+            user.apellido = apellido;
+            user.correo = correo;
+            user.telefono = telefono;
+            user.direccion = direccion;
+            localStorage.setItem('user', JSON.stringify(user));
+            document.getElementById('perfilNombreSpan').textContent = nombre;
+            document.getElementById('perfilApellidoSpan').textContent = apellido;
+            document.getElementById('perfilCorreoSpan').textContent = correo;
+            if(document.getElementById('perfilTelefonoSpan')) document.getElementById('perfilTelefonoSpan').textContent = telefono;
+            if(document.getElementById('perfilDireccionSpan')) document.getElementById('perfilDireccionSpan').textContent = direccion;
+            
+            document.getElementById('perfilMsg').textContent = 'Perfil actualizado correctamente.';
+            document.getElementById('perfilMsg').style.color = 'green';
+            setTimeout(()=>{
+              document.getElementById('modalPerfil').style.display = 'none';
+            }, 1200);
+          } else {
+            document.getElementById('perfilMsg').textContent = data.error || 'No se pudo actualizar el perfil.';
+            document.getElementById('perfilMsg').style.color = 'crimson';
+          }
+        })
+        .catch(err => {
+          document.getElementById('perfilMsg').textContent = 'Error de conexión con el servidor.';
+          document.getElementById('perfilMsg').style.color = 'crimson';
+        });
+      });
+    }
+
+    // Guardar gestión de cita (Psicólogo)
+    const formGestionCita = document.getElementById('formGestionCita');
+    if(formGestionCita){
+        formGestionCita.addEventListener('submit', function(e){
+            e.preventDefault();
+            const id_cita = document.getElementById('gestionCitaId').value;
+            const estado = document.getElementById('gestionCitaEstado').value;
+            const fecha = document.getElementById('gestionCitaFecha').value; // Mantener fecha original
+            const hora = document.getElementById('gestionCitaHora').value;   // Mantener hora original
+            
+            document.getElementById('gestionCitaMsg').textContent = 'Actualizando...';
+            
+            fetch('backend/api/cita.php', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    id_cita,
+                    estado,
+                    fecha,
+                    hora
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success){
+                    document.getElementById('gestionCitaMsg').textContent = 'Cita actualizada.';
+                    document.getElementById('gestionCitaMsg').style.color = 'green';
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    document.getElementById('gestionCitaMsg').textContent = data.error || 'Error al actualizar.';
+                    document.getElementById('gestionCitaMsg').style.color = 'crimson';
+                }
+            })
+            .catch(() => {
+                document.getElementById('gestionCitaMsg').textContent = 'Error de conexión.';
+            });
+        });
+    }
+
+    // Guardar nueva cita (conexión real backend, seleccionando psicólogo)
+    const formCita = document.getElementById('formCita');
+    if(formCita){
+      formCita.addEventListener('submit', function(e){
+        e.preventDefault();
+        const fecha = document.getElementById('citaFecha').value;
+        const hora = document.getElementById('citaHora').value;
+        const id_psicologo = document.getElementById('citaPsicologo').value;
+        if(!fecha || !hora || !id_psicologo){
+          document.getElementById('citaMsg').textContent = 'Todos los campos son obligatorios.';
+          document.getElementById('citaMsg').style.color = 'crimson';
+          return;
+        }
+        document.getElementById('citaMsg').textContent = 'Agendando...';
+        document.getElementById('citaMsg').style.color = '#333';
+        fetch('backend/api/cita.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            fecha,
+            hora,
+            id_paciente: user.user_id,
+            id_psicologo
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if(data.success){
+            document.getElementById('proximaCita').textContent = `Tu próxima cita: ${fecha} a las ${hora}`;
+            document.getElementById('citaMsg').textContent = 'Cita agendada correctamente.';
+            document.getElementById('citaMsg').style.color = 'green';
+            setTimeout(()=>{
+              document.getElementById('modalCita').style.display = 'none';
+            }, 1200);
+          } else {
+            document.getElementById('citaMsg').textContent = data.error || 'No se pudo agendar la cita.';
+            document.getElementById('citaMsg').style.color = 'crimson';
+          }
+        })
+        .catch(err => {
+          document.getElementById('citaMsg').textContent = 'Error de conexión con el servidor.';
+          document.getElementById('citaMsg').style.color = 'crimson';
+        });
+      });
+    }
+  }
+  });
+  </script>
+</body>
+</html>
+
+    

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iniciar sesión / Registrarse — Bienestar</title>
+  <meta name="description" content="Inicia sesión o crea una cuenta para agendar tus sesiones.">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" style="display:flex;align-items:center;gap:.6em;">
+        <img src="assets/logo.jpg" alt="Logo de Bienestar Emocional, psicología y bienestar" style="height:36px;width:auto;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <span>Bienestar Emocional</span>
+      </a>
+      <nav class="main-nav" id="mainNav">
+        <a href="index.html">Inicio</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="equipo.html">Equipo</a>
+        <a href="about.html">Sobre Nosotros</a>
+        <a href="auth.html" class="button active" aria-current="page">Iniciar sesión</a>
+      </nav>
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+    </div>
+  </header>
+
+  <main>
+  <section class="container contact will-animate">
+    <h1>Bienvenido</h1>
+    <div class="auth-tabs" style="display:flex;justify-content:center;gap:1em;margin-bottom:2em;">
+      <button id="tabLogin" class="btn secondary" type="button">Iniciar Sesión</button>
+      <button id="tabRegister" class="btn secondary" type="button">Registrarse</button>
+    </div>
+    <div id="loginCard" class="card will-animate">
+      <h2>Iniciar sesión</h2>
+      <form id="loginForm" novalidate>
+        <label for="emailLogin">Correo electrónico</label>
+        <input id="emailLogin" name="email" type="email" required>
+        <label for="passwordLogin">Contraseña</label>
+        <input id="passwordLogin" name="password" type="password" required>
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+      <p class="small" style="margin-top:1em;">¿No tienes cuenta? <a href="#" id="showRegister">Regístrate aquí</a></p>
+    </div>
+    <div id="registerCard" class="card will-animate" style="display:none;">
+      <h2>Registrarse</h2>
+      <form id="registerForm" novalidate>
+        <label for="nameReg">Nombre</label>
+        <input id="nameReg" name="nombre" type="text" required>
+        <label for="lastnameReg">Apellido</label>
+        <input id="lastnameReg" name="apellido" type="text" required>
+        <label for="genderReg">Género</label>
+        <select id="genderReg" name="genero" required>
+          <option value="">Selecciona una opción</option>
+          <option value="masculino">Masculino</option>
+          <option value="femenino">Femenino</option>
+          <option value="otro">Otro</option>
+          <option value="prefiero_no_decirlo">Prefiero no decirlo</option>
+        </select>
+        <label for="telefonoReg">Teléfono</label>
+        <input id="telefonoReg" name="telefono" type="tel" required>
+        <label for="direccionReg">Dirección</label>
+        <input id="direccionReg" name="direccion" type="text" required>
+        <label for="rolReg">Rol</label>
+        <select id="rolReg" name="rol" required>
+          <option value="">Selecciona un rol</option>
+          <option value="paciente">Paciente</option>
+          <option value="psicologo">Psicólogo</option>
+        </select>
+        <label for="emailReg">Correo electrónico</label>
+        <input id="emailReg" name="email" type="email" required>
+        <label for="passwordReg">Contraseña</label>
+        <input id="passwordReg" name="password" type="password" required>
+        <button class="btn primary" type="submit">Crear cuenta</button>
+      </form>
+      <p class="small" style="margin-top:1em;">¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión aquí</a></p>
+    </div>
+    
+  </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:2rem;">
+      <!-- Legal -->
+      <div class="footer-col" style="min-width:220px;flex:1;">
+        <p class="small">&copy; 2025 Bienestar — Atención psicológica.<br>Todos los derechos reservados.</p>
+        <a href="#" class="small">Aviso Legal</a>
+      </div>
+      <!-- Navegación y redes -->
+      <div class="footer-col" style="min-width:220px;flex:1;text-align:center;">
+        <nav class="footer-nav" style="margin-bottom:.7em;">
+          <a href="index.html">Inicio</a> |
+          <a href="servicios.html">Servicios</a> |
+          <a href="equipo.html">Equipo</a>
+        </nav>
+        <div class="footer-social" style="display:flex;justify-content:center;gap:.7em;">
+          <a href="#" aria-label="Instagram" title="Instagram"><img src="assets/instagram.svg" alt="Instagram" width="24" height="24" style="vertical-align:middle;"></a>
+          <a href="#" aria-label="Facebook" title="Facebook"><img src="assets/facebook.svg" alt="Facebook" width="24" height="24" style="vertical-align:middle;"></a>
+          <a href="#" aria-label="LinkedIn" title="LinkedIn"><img src="assets/linkedin.svg" alt="LinkedIn" width="24" height="24" style="vertical-align:middle;"></a>
+        </div>
+      </div>
+      <!-- Contacto -->
+      <div class="footer-col" style="min-width:220px;flex:1;text-align:right;">
+        <p class="small"><strong>Dirección:</strong><br>Km. 37.5 Carr. Federal Mexico - Pachuca, 55740 Tecamac, ESTADO DE MEXICO</p>
+        <p class="small"><strong>Tel:</strong> +56 9 1234 5678<br><strong>Correo:</strong> contacto@tubienestar.com</p>
+      </div>
+    </div>
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Ir arriba" title="Ir arriba" style="position:fixed;bottom:2.2rem;right:2.2rem;z-index:1000;display:none;background:var(--secondary);color:#fff;border:none;border-radius:50%;width:48px;height:48px;box-shadow:0 4px 16px rgba(47,79,79,0.13);font-size:1.7rem;cursor:pointer;transition:opacity .2s;align-items:center;justify-content:center;">
+    91
+  </button>
+  <script src="script.js" type="module" defer></script>
+</body>
+</html>

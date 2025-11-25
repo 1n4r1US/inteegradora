@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" fill="none">
+  <rect width="1200" height="600" rx="24" fill="#F5FFF8"/>
+  <g transform="translate(80,80)">
+    <circle cx="140" cy="140" r="120" fill="#3CB371" opacity="0.12"/>
+    <rect x="320" y="40" width="480" height="360" rx="18" fill="#FFFFFF" stroke="#E6F3EE"/>
+    <text x="360" y="120" font-family="Roboto, sans-serif" font-size="28" fill="#2F4F4F">Ilustración de apoyo emocional</text>
+    <text x="360" y="160" font-family="Roboto, sans-serif" font-size="18" fill="#6b7280">Placeholder: reemplaza con una imagen real</text>
+  </g>
+</svg>
