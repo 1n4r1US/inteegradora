@@ -94,7 +94,8 @@
     const dashboardTitle = document.getElementById('dashboard-title');
     const dashboardContent = document.getElementById('dashboard-content');
     if (!user || !user.rol) {
-      window.location.href = '../auth.html';
+      const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+      window.location.href = path + '/auth.html';
     } else {
       dashboardTitle.textContent = `Bienvenido, ${user.nombre} (${user.rol})`;
       dashboardContent.classList.add(user.rol);
@@ -473,8 +474,16 @@
       // Cerrar sesión
       if(e.target && e.target.id === 'logoutBtn'){
         e.preventDefault();
-        localStorage.removeItem('user');
-        window.location.href = 'logout.html';
+        fetch('backend/api/logout.php')
+          .then(() => {
+            localStorage.removeItem('user');
+            window.location.href = 'logout.html';
+          })
+          .catch(() => {
+             // Forzar salida aunque falle la API
+             localStorage.removeItem('user');
+             window.location.href = 'logout.html';
+          });
       }
       // Abrir modal editar perfil
       if(e.target && e.target.id === 'btnEditarPerfil'){

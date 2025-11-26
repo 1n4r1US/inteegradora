@@ -2,6 +2,22 @@
 
 Sistema web para la gestión de consultas psicológicas, permitiendo a pacientes agendar citas y a psicólogos administrar su práctica profesional.
 
+## 📦 ¿Instalando en otra computadora?
+
+> **¡IMPORTANTE!** Si vas a instalar este proyecto en una nueva computadora, sigue estos pasos:
+> 
+> 1. 📖 Lee la **[Guía de Instalación Completa](GUIA_INSTALACION.md)** - Instrucciones paso a paso para Windows, Mac y Linux
+> 2. ✅ Usa el **[Checklist de Instalación](CHECKLIST_INSTALACION.md)** - Para marcar tu progreso
+> 3. 🔍 Ejecuta la **[Verificación de Instalación](http://localhost/integradora-backend/verificar_instalacion.html)** después de instalar
+> 4. 🪟 En Windows: Ejecuta **[verificar_instalacion.bat](verificar_instalacion.bat)** para verificación rápida
+> 
+> La guía completa incluye:
+> - ✅ Instalación de WAMP/MAMP/LAMP
+> - ✅ Configuración de la base de datos
+> - ✅ Solución de problemas comunes
+> - ✅ Checklist completo de instalación
+
+
 ## 🚀 Características Principales
 
 - ✅ **Autenticación segura** con sesiones PHP
@@ -232,12 +248,6 @@ DELETE /backend/api/consultorio.php   # Eliminar consultorio
 ### Los módulos ES6 no cargan
 - Asegúrate de acceder vía `http://localhost/...` (no `file://`)
 - Verifica que los tags `<script>` tengan `type="module"`
-
-## 📚 Documentación Adicional
-
-- [Setup Instructions](setup_instructions.md) - Guía detallada de instalación
-- [Walkthrough](walkthrough.md) - Documentación de mejoras implementadas
-- [Analysis Report](analysis_report.md) - Análisis inicial del proyecto
 
 ## 🔄 Changelog
 

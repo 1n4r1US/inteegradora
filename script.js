@@ -22,19 +22,30 @@ document.addEventListener('DOMContentLoaded', async function () {
   const navLogin = document.querySelector('a[href="auth.html"]');
 
   if (userSession.success) {
+    // Sincronizar localStorage con la sesión del servidor para evitar bucles de redirección
+    if (userSession.user) {
+      localStorage.setItem('user', JSON.stringify(userSession.user));
+    }
+
     // Si el usuario está logueado y estamos en auth.html, redirigir al dashboard
     if (window.location.pathname.includes('auth.html')) {
-      window.location.href = 'dashboard.html';
+      const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+      window.location.href = path + '/dashboard.html';
     }
     // Cambiar botón de login por logout o dashboard
     if (navLogin) {
       navLogin.textContent = 'Dashboard';
-      navLogin.href = 'dashboard.html';
+      const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+      navLogin.href = path + '/dashboard.html';
     }
   } else {
+    // Si NO está autenticado, limpiar localStorage para evitar inconsistencias
+    localStorage.removeItem('user');
+
     // Si NO está logueado y estamos en dashboard.html, redirigir a auth
     if (window.location.pathname.includes('dashboard.html')) {
-      window.location.href = 'auth.html';
+      const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+      window.location.href = path + '/auth.html';
     }
   }
 
@@ -45,6 +56,8 @@ document.addEventListener('DOMContentLoaded', async function () {
       e.preventDefault();
       showLoader();
       await logout();
+      // Limpiar localStorage al cerrar sesión
+      localStorage.removeItem('user');
       window.location.href = 'index.html';
     });
   }
@@ -103,9 +116,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (submitBtn) submitBtn.classList.remove('btn-loading');
 
         if (data.success && data.user) {
+          localStorage.setItem('user', JSON.stringify(data.user));
           showSuccess('¡Bienvenido! Redirigiendo...');
           setTimeout(() => {
-            window.location.href = 'dashboard.html';
+            const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+            window.location.href = path + '/dashboard.html';
           }, 500);
         } else {
           showError(data.message || 'Credenciales incorrectas.');
@@ -157,9 +172,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (submitBtn) submitBtn.classList.remove('btn-loading');
 
         if (data.success) {
+          localStorage.setItem('user', JSON.stringify(data.usuario));
           showSuccess('¡Registro exitoso! Bienvenido/a, ' + data.usuario.nombre + '.');
           setTimeout(() => {
-            window.location.href = 'dashboard.html';
+            const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+            window.location.href = path + '/dashboard.html';
           }, 1000);
         } else {
           showError(data.error || 'Ocurrió un error al registrar.');
